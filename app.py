@@ -6,7 +6,7 @@ from pathlib import Path
 
 st.set_page_config(page_title="Où vivre en 2040 ?", layout="wide")
 
-st.title("Dashboard interactif")
+st.title("Évolution du chômage par département")
 
 # emplois et chomage
 chomage_2000_2025_dep = "tables/emplois et chomage/Demandeurs_emploi_taux_chomage_2000_2025.xlsx"
@@ -26,22 +26,62 @@ données_accès_hopitaux = "tables/Santé/analyse_acces_hopital_2010.xlsx"
 couverture_medicale_2024 = "tables/Santé/santé data.xlsx"
 
 
-# Jeu de données simple
-df = pd.DataFrame({
-    "mois": ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"],
-    "ventes": [120, 180, 150, 220, 260, 300],
-    "couts": [80, 110, 105, 140, 170, 210],
-})
+# Jeu de données chomage
+chomage_df = pd.read_excel(chomage_2000_2025_dep)
 
-metrique = st.selectbox("Choisis une métrique", ["ventes", "couts"])
+chomage_df.columns = chomage_df.columns.str.strip()
 
-fig = px.bar(
-    df,
-    x="mois",
-    y=metrique,
-    title=f"Évolution des {metrique}"
+# Colonnes des taux de chômage
+taux_cols = [col for col in chomage_df.columns if col.startswith("Taux de chomage")]
+
+if not taux_cols:
+    st.error("Aucune colonne 'Taux de chomage ...' trouvée dans le fichier Excel.")
+    st.stop()
+
+    # Passage du format large au format long
+df_long = chomage_df.melt(
+    id_vars=["Département"],
+    value_vars=taux_cols,
+    var_name="Année",
+    value_name="Taux de chômage"
+)
+
+# Extraire l'année depuis 'Taux de chomage 2000'
+df_long["Année"] = df_long["Année"].str.extract(r"(\d{4})").astype(int)
+
+# Sécurise le type numérique
+df_long["Taux de chômage"] = (
+    df_long["Taux de chômage"]
+    .astype(str)
+    .str.replace(",", ".", regex=False)
+)
+df_long["Taux de chômage"] = pd.to_numeric(df_long["Taux de chômage"], errors="coerce")
+
+liste_departements = sorted(df_long["Département"].dropna().astype(str).unique())
+
+departements_selectionnes = st.multiselect(
+    "Choisis un ou plusieurs départements",
+    options=liste_departements,
+    default=liste_departements[:1]
+)
+if not departements_selectionnes:
+    st.warning("Sélectionne au moins un département.")
+    st.stop()
+
+df_filtre = df_long[df_long["Département"].isin(departements_selectionnes)]
+
+# Graphique
+fig = px.line(
+    df_filtre,
+    x="Année",
+    y="Taux de chômage",
+    color="Département",
+    markers=True,
+    title="Évolution du taux de chômage"
 )
 
 st.plotly_chart(fig, use_container_width=True)
 
-st.dataframe(df)
+# Tableau en dessous
+st.subheader("Données utilisées")
+st.dataframe(df_filtre, use_container_width=True)
