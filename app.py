@@ -77,7 +77,7 @@ fig = px.line(
     y="Taux de chômage",
     color="Département",
     markers=True,
-    title="Évolution du taux de chômage"
+    title="Évolution du taux de chômages"
 )
 
 st.plotly_chart(fig, use_container_width=True)
