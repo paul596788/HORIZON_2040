@@ -77,9 +77,9 @@ st.caption(
 # -----------------------------
 # Load data
 # -----------------------------
-temperature_df = charger_csv("pages/tables/Climat/Temperature_2040_df.csv")
-flood_df = charger_csv("pages/tables/Climat/Flood_df.csv")
-water_df = charger_csv("pages/tables/Climat/water_pressure_df.csv")
+temperature_df = charger_csv("pages/tables/Temperature_2040_df.csv")
+flood_df = charger_csv("pages/tables/Flood_df.csv")
+water_df = charger_csv("pages/tables/water_pressure_df.csv")
 
 # Base scores
 
@@ -1159,7 +1159,7 @@ else:
     with st.expander("Détails scientifiques", expanded=False):
         st.markdown(
             f"""
-**Focus local**  
+**Focus local**
 {focus if focus else "Pas de focus spécifique défini pour ce département."}
 """
         )
