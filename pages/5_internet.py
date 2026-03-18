@@ -5,13 +5,12 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from utils.excel_helpers import charger_csv, charger_geojson
 
 st.title("Déploiement de la fibre en France")
 
-df = pd.read_csv("pages/tables/Internet.csv")
-geojson_departements = json.loads(
-    Path("pages/tables/departements.geojson").read_text(encoding="utf-8")
-)
+df = charger_csv("pages/tables/Internet.csv")
+geojson_departements = charger_geojson("pages/tables/departements.geojson")
 corrections_noms = {
     "Côtes d'Armor": "Côtes-d'Armor",
     "Seine-St-Denis": "Seine-Saint-Denis",

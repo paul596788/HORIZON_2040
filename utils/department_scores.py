@@ -2,8 +2,15 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import streamlit as st
 
-from utils.excel_helpers import charger_excel, colonnes_sans_unnamed, nettoyer_colonnes
+from utils.excel_helpers import (
+    charger_csv,
+    charger_excel,
+    charger_geojson,
+    colonnes_sans_unnamed,
+    nettoyer_colonnes,
+)
 
 
 def _normaliser_serie(serie, inverse=False):
@@ -233,7 +240,7 @@ def _score_sante():
 
 
 def _score_internet():
-    df = pd.read_csv("pages/tables/Internet.csv")
+    df = charger_csv("pages/tables/Internet.csv")
     df["Dep_name"] = df["Dep_name"].replace(
         {
             "Côtes d'Armor": "Côtes-d'Armor",
@@ -250,7 +257,7 @@ def _score_internet():
 
 
 def _score_criminalite():
-    df = pd.read_csv("pages/tables/CrimebyDept_2040.csv")
+    df = charger_csv("pages/tables/CrimebyDept_2040.csv")
     df["Coefficient"] = pd.to_numeric(df["Coefficient"], errors="coerce")
     df["nombre"] = pd.to_numeric(df["nombre"], errors="coerce")
     df["Score criminalité"] = _normaliser_serie(df["Coefficient"]).round(4)
@@ -260,15 +267,13 @@ def _score_criminalite():
 
 
 def _score_education():
-    geojson_departements = json.loads(
-        Path("pages/tables/departements.geojson").read_text(encoding="utf-8")
-    )
+    geojson_departements = charger_geojson("pages/tables/departements.geojson")
     code_to_name = {
         feature["properties"]["code"]: feature["properties"]["nom"]
         for feature in geojson_departements["features"]
     }
 
-    df = pd.read_csv("pages/tables/Education.csv")
+    df = charger_csv("pages/tables/Education.csv")
     df["num_dep"] = df["num_dep"].astype(str).str.zfill(2)
     df["Département"] = df["num_dep"].map(code_to_name)
     df["coefficient"] = pd.to_numeric(df["coefficient"], errors="coerce")
@@ -281,7 +286,7 @@ def _score_education():
 
 
 def _score_immobilier():
-    df = pd.read_csv("pages/tables/Real_Estate_Prices.csv", sep=";")
+    df = charger_csv("pages/tables/Real_Estate_Prices.csv", sep=";")
     df["Coefficient"] = pd.to_numeric(df["Coefficient"], errors="coerce")
     df["Price2025"] = pd.to_numeric(df["Price2025"], errors="coerce")
     df["Price2040"] = pd.to_numeric(df["Price2040"], errors="coerce")
@@ -290,7 +295,7 @@ def _score_immobilier():
         ["Département", "Score immobilier", "Coefficient", "Price2025", "Price2040"]
     ]
 
-
+@st.cache_data
 def calculer_scores_departements():
     score_emploi = _score_emploi()
     score_etudiants = _score_etudiants()

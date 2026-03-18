@@ -5,18 +5,17 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from utils.excel_helpers import charger_csv, charger_geojson
 
 st.title("Éducation et dynamique étudiante")
 
-geojson_departements = json.loads(
-    Path("pages/tables/departements.geojson").read_text(encoding="utf-8")
-)
+geojson_departements = charger_geojson("pages/tables/departements.geojson")
 code_to_name = {
     feature["properties"]["code"]: feature["properties"]["nom"]
     for feature in geojson_departements["features"]
 }
 
-df = pd.read_csv("pages/tables/Education.csv")
+df = charger_csv("pages/tables/Education.csv")
 df["num_dep"] = df["num_dep"].astype(str).str.zfill(2)
 df["Département"] = df["num_dep"].map(code_to_name)
 

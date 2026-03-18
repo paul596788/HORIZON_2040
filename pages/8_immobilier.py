@@ -5,14 +5,13 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from utils.excel_helpers import charger_csv, charger_geojson
 
 st.title("Prix de l'immobilier par département")
 
-geojson_departements = json.loads(
-    Path("pages/tables/departements.geojson").read_text(encoding="utf-8")
-)
+geojson_departements = charger_geojson("pages/tables/departements.geojson")
 
-df = pd.read_csv("pages/tables/Real_Estate_Prices.csv", sep=";")
+df = charger_csv("pages/tables/Real_Estate_Prices.csv", sep=";")
 df["num_dep"] = df["num_dep"].astype(str).str.zfill(2)
 
 colonnes_num = ["Price2025", "Price2040", "Growth", "Coefficient"]
