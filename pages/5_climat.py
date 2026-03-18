@@ -77,9 +77,9 @@ st.caption(
 # -----------------------------
 # Load data
 # -----------------------------
-temperature_df = pd.read_csv("pages/tables/Temperature_2040_df.csv")
-flood_df = pd.read_csv("pages/tables/Flood_df.csv")
-water_df = pd.read_csv("pages/tables/water_pressure_df.csv")
+temperature_df = pd.read_csv("pages/tables/Climat/Temperature_2040_df.csv")
+flood_df = pd.read_csv("pages/tables/Climat/Flood_df.csv")
+water_df = pd.read_csv("pages/tables/Climat/water_pressure_df.csv")
 
 # Base scores
 
@@ -115,7 +115,7 @@ climate_df["code"] = climate_df["code"].apply(
 )
 
 # Demographic data (same as Explorer)
-old_df = pd.read_csv("pages/tables/Old_df.csv")
+old_df = pd.read_csv("pages/tables/Transition_démographique/Old_df.csv")
 old_df["code"] = old_df["code"].astype(str).str.strip().str.upper()
 old_df["code"] = old_df["code"].apply(
     lambda code: code.zfill(2) if code.isdigit() else code
