@@ -73,57 +73,70 @@ st.plotly_chart(fig_carte, use_container_width=True)
 st.subheader("Classements immobiliers")
 st.caption("Vue directe sur les départements les plus chers et les mieux notés.")
 
+gauche, droite = st.columns(2, gap="large")
+
 top_prix = (
     df.dropna(subset=["dep_name", "Price2025"])
     .sort_values("Price2025", ascending=False)
-    .head(15)
+    .head(12)
 )
 fig_prix = px.bar(
     top_prix,
     x="Price2025",
     y="dep_name",
     orientation="h",
-    title="Départements les plus chers en 2025",
+    title="Départements les plus chers",
     labels={"dep_name": "Département", "Price2025": "Prix 2025 (€/m²)"},
-    text="Price2025",
 )
 fig_prix.update_traces(
     marker_color="#f97316",
-    texttemplate="%{text:,.0f} €/m²",
-    textposition="outside",
-    cliponaxis=False,
     hovertemplate="<b>%{y}</b><br>Prix 2025: %{x:,.0f} €/m²<extra></extra>",
 )
 fig_prix.update_layout(
     template="plotly_dark",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    height=520,
+    height=560,
     showlegend=False,
+    bargap=0.18,
     xaxis={"showgrid": True, "gridcolor": "rgba(255,255,255,0.08)"},
+    margin={"l": 0, "r": 0, "t": 50, "b": 0},
+    yaxis={"title": None, "tickfont": {"size": 13}},
 )
-fig_prix.update_yaxes(categoryorder="total ascending")
-st.plotly_chart(fig_prix, use_container_width=True)
+fig_prix.update_yaxes(categoryorder="total ascending", automargin=True)
+fig_prix.update_xaxes(automargin=True)
+gauche.plotly_chart(fig_prix, use_container_width=True)
 
 top_coef = df.sort_values("Coefficient (%)", ascending=False).head(15)
 fig_coef = px.bar(
-    top_coef,
+    top_coef.head(12),
     x="Coefficient (%)",
     y="dep_name",
     orientation="h",
-    color="Growth (%)",
-    title="Départements les mieux notés par le coefficient immobilier",
+    title="Départements les mieux notés",
     labels={"dep_name": "Département", "Coefficient (%)": "Coefficient (%)"},
-    color_continuous_scale="YlGn",
+    text="Coefficient (%)",
+)
+fig_coef.update_traces(
+    marker_color="#22c55e",
+    texttemplate="%{text:.0f}",
+    textposition="outside",
+    cliponaxis=False,
+    hovertemplate="<b>%{y}</b><br>Coefficient: %{x:.1f}%<extra></extra>",
 )
 fig_coef.update_layout(
     template="plotly_dark",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    height=520,
+    height=560,
+    bargap=0.18,
+    margin={"l": 0, "r": 0, "t": 50, "b": 0},
+    yaxis={"title": None, "tickfont": {"size": 13}},
+    showlegend=False,
 )
-fig_coef.update_yaxes(categoryorder="total ascending")
-st.plotly_chart(fig_coef, use_container_width=True)
+fig_coef.update_yaxes(categoryorder="total ascending", automargin=True)
+fig_coef.update_xaxes(automargin=True)
+droite.plotly_chart(fig_coef, use_container_width=True)
 
 fig_scatter = px.scatter(
     df,
