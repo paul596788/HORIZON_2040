@@ -85,7 +85,7 @@ for theme in selection_themes:
         min_value=0.0,
         max_value=1.0,
         value=1.0,
-        step=0.1,
+        step=0.05,
         key=f"poids_{theme}",
     )
 
@@ -126,15 +126,31 @@ color_scale = [
 ]
 
 scores_carte = scores[~scores["Département"].isin(["La Réunion", "Martinique"])].copy()
+carte_colonne = "Score global personnalisé"
+carte_titre = "Score"
+range_color = (0, 1)
+
+if len(selection_themes) == 1:
+    theme_unique = selection_themes[0]
+    carte_colonne = themes[theme_unique]
+    carte_titre = theme_unique
+    serie_carte = scores_carte[carte_colonne].dropna()
+    if not serie_carte.empty:
+        q05 = float(serie_carte.quantile(0.05))
+        q95 = float(serie_carte.quantile(0.95))
+        if q95 > q05:
+            range_color = (q05, q95)
+        else:
+            range_color = (float(serie_carte.min()), float(serie_carte.max()))
 
 fig = px.choropleth(
     scores_carte,
     geojson=geojson_departements,
     locations="Département",
     featureidkey="properties.nom",
-    color="Score global personnalisé",
+    color=carte_colonne,
     color_continuous_scale=color_scale,
-    range_color=(0, 1),
+    range_color=range_color,
     hover_name="Département",
     custom_data=["Département", "Région", "Score global personnalisé"] + colonnes_selectionnees,
 )
@@ -167,7 +183,7 @@ fig.update_layout(
     plot_bgcolor="rgba(0,0,0,0)",
     font={"color": "#e8edf2"},
     coloraxis_colorbar={
-        "title": {"text": "Score", "font": {"color": "#e8edf2"}},
+        "title": {"text": carte_titre, "font": {"color": "#e8edf2"}},
         "tickfont": {"color": "#cfd6df"},
         "bgcolor": "rgba(0,0,0,0)",
         "len": 0.78,
