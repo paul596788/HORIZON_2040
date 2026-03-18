@@ -239,6 +239,52 @@ def _score_sante():
     ]
 
 
+def _score_climat():
+    geojson_departements = charger_geojson("pages/tables/departements.geojson")
+    code_to_name = {
+        feature["properties"]["code"]: feature["properties"]["nom"]
+        for feature in geojson_departements["features"]
+    }
+
+    temperature_df = charger_csv("pages/tables/Temperature_2040_df.csv")
+    flood_df = charger_csv("pages/tables/Flood_df.csv")
+    water_df = charger_csv("pages/tables/water_pressure_df.csv")
+
+    temperature_df["score_temperature"] = (
+        0.60 * temperature_df["nuits_tropicales"] + 0.40 * temperature_df["jours_sup_35C"]
+    )
+    flood_df["score_flood"] = (
+        0.70 * flood_df["score_scena_risque_normalise"] + 0.30 * flood_df["score_land_perc"]
+    )
+    water_df["score_water"] = (
+        0.40 * water_df["precipitations_ete"]
+        + 0.30 * (1 - water_df["indice_humidite_sol"])
+        + 0.20 * water_df["Volume"]
+    )
+
+    climate_df = (
+        temperature_df[["code", "score_temperature"]]
+        .merge(flood_df[["code", "score_flood"]], on="code", how="left")
+        .merge(water_df[["code", "score_water"]], on="code", how="left")
+    )
+
+    climate_df["score_flood"] = climate_df["score_flood"].fillna(1)
+    climate_df["score_water"] = climate_df["score_water"].fillna(0)
+    climate_df["score_temperature"] = climate_df["score_temperature"].fillna(0)
+    climate_df["code"] = climate_df["code"].astype(str).str.strip().str.upper()
+    climate_df["code"] = climate_df["code"].apply(
+        lambda code: code.zfill(2) if code.isdigit() else code
+    )
+    climate_df["Département"] = climate_df["code"].map(code_to_name)
+    climate_df["Score climat"] = (
+        0.6 * climate_df["score_temperature"]
+        + 0.1 * climate_df["score_flood"]
+        + 0.3 * climate_df["score_water"]
+    ).round(4)
+
+    return climate_df[["Département", "Score climat", "score_temperature", "score_flood", "score_water"]]
+
+
 def _score_internet():
     df = charger_csv("pages/tables/Internet.csv")
     df["Dep_name"] = df["Dep_name"].replace(
@@ -301,6 +347,7 @@ def calculer_scores_departements():
     score_etudiants = _score_etudiants()
     score_revenu = _score_revenu()
     score_sante = _score_sante()
+    score_climat = _score_climat()
     score_internet = _score_internet()
     score_criminalite = _score_criminalite()
     score_education = _score_education()
@@ -309,6 +356,7 @@ def calculer_scores_departements():
     scores = score_revenu.merge(score_emploi, on="Département", how="left")
     scores = scores.merge(score_etudiants, on="Département", how="left")
     scores = scores.merge(score_sante, on="Département", how="left")
+    scores = scores.merge(score_climat, on="Département", how="left")
     scores = scores.merge(score_internet, on="Département", how="left")
     scores = scores.merge(score_criminalite, on="Département", how="left")
     scores = scores.merge(score_education, on="Département", how="left")
@@ -321,6 +369,7 @@ def calculer_scores_departements():
             "Score étudiants": 1.0,
             "Score revenu": 1.0,
             "Score santé": 1.0,
+            "Score climat": 1.0,
             "Score internet": 1.0,
             "Score criminalité": 1.0,
             "Score éducation": 1.0,

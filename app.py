@@ -59,6 +59,7 @@ themes = {
     "Étudiants": "Score étudiants",
     "Revenu": "Score revenu",
     "Santé": "Score santé",
+    "Climat": "Score climat",
     "Internet": "Score internet",
     "Criminalité": "Score criminalité",
     "Éducation": "Score éducation",
