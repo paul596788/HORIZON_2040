@@ -14,21 +14,25 @@ geojson_departements = charger_geojson("pages/tables/departements.geojson")
 
 df["num_dep"] = df["num_dep"].astype(str).str.zfill(2)
 df["nombre"] = pd.to_numeric(df["nombre"], errors="coerce")
-df["Coefficient"] = pd.to_numeric(df["Coefficient"], errors="coerce")
+df["coefficient"] = pd.to_numeric(df["coefficient"], errors="coerce")
+df["taux_pour_mille_2040"] = pd.to_numeric(df["taux_pour_mille_2040"], errors="coerce")
+df["Coefficient favorable"] = (1 - df["coefficient"]) * 100
+df["Crimes pour 1000 habitants"] = df["taux_pour_mille_2040"] * 1000
 
 indicateurs = {
     "Nombre de crimes projetés": "nombre",
-    "Coefficient de sécurité": "Coefficient",
+    "Crimes pour 1000 habitants": "Crimes pour 1000 habitants",
+    "Score sécurité": "Coefficient favorable",
 }
 indicateur = st.selectbox("Indicateur affiché sur la carte", list(indicateurs.keys()))
 colonne_carte = indicateurs[indicateur]
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Départements couverts", f"{df['dep_name'].nunique()}")
-col2.metric("Crimes projetés moyens", f"{df['nombre'].mean():,.0f}".replace(",", " "))
+col2.metric("Crimes moyens pour 1000 hab.", f"{df['Crimes pour 1000 habitants'].mean():.1f}")
 col3.metric(
     "Département le plus sûr",
-    df.sort_values("Coefficient", ascending=False).iloc[0]["dep_name"],
+    df.sort_values("Coefficient favorable", ascending=False).iloc[0]["dep_name"],
 )
 
 fig_carte = px.choropleth(
@@ -41,10 +45,15 @@ fig_carte = px.choropleth(
     hover_data={
         "num_dep": True,
         "nombre": ":,",
-        "Coefficient": ":.2f",
+        "Crimes pour 1000 habitants": ":.1f",
+        "Coefficient favorable": ":.1f",
     },
-    color_continuous_scale="YlOrRd" if colonne_carte == "nombre" else "YlGn",
-    labels={"nombre": "Crimes projetés", "Coefficient": "Coefficient"},
+    color_continuous_scale="YlOrRd" if colonne_carte != "Coefficient favorable" else "YlGn",
+    labels={
+        "nombre": "Crimes projetés",
+        "Crimes pour 1000 habitants": "Crimes pour 1000 hab.",
+        "Coefficient favorable": "Score sécurité",
+    },
 )
 fig_carte.update_geos(fitbounds="locations", visible=False, projection={"type": "mercator"})
 fig_carte.update_layout(
@@ -64,7 +73,7 @@ fig_top = px.bar(
     x="nombre",
     y="dep_name",
     orientation="h",
-    color="Coefficient",
+    color="Crimes pour 1000 habitants",
     title="Départements avec le plus de crimes projetés",
     labels={"dep_name": "Département", "nombre": "Crimes projetés"},
     color_continuous_scale="YlOrRd_r",
@@ -77,15 +86,15 @@ fig_top.update_layout(
 fig_top.update_yaxes(categoryorder="total ascending")
 gauche.plotly_chart(fig_top, use_container_width=True)
 
-top_safe = df.sort_values("Coefficient", ascending=False).head(15)
+top_safe = df.sort_values("Coefficient favorable", ascending=False).head(15)
 fig_safe = px.bar(
     top_safe,
-    x="Coefficient",
+    x="Coefficient favorable",
     y="dep_name",
     orientation="h",
-    color="Coefficient",
-    title="Départements les mieux notés par le coefficient",
-    labels={"dep_name": "Département"},
+    color="Coefficient favorable",
+    title="Départements les plus sûrs selon le score favorable",
+    labels={"dep_name": "Département", "Coefficient favorable": "Score sécurité"},
     color_continuous_scale="YlGn",
 )
 fig_safe.update_layout(
@@ -97,14 +106,14 @@ fig_safe.update_yaxes(categoryorder="total ascending")
 droite.plotly_chart(fig_safe, use_container_width=True)
 
 fig_scatter = px.scatter(
-    df.sort_values("Coefficient"),
-    x="Coefficient",
+    df.sort_values("Coefficient favorable"),
+    x="Crimes pour 1000 habitants",
     y="nombre",
     hover_name="dep_name",
     text="num_dep",
-    title="Relation entre coefficient et volume de crimes",
+    title="Volume de crimes et intensité rapportée à la population",
     labels={"nombre": "Crimes projetés"},
-    color="Coefficient",
+    color="Coefficient favorable",
     color_continuous_scale="Viridis",
 )
 fig_scatter.update_traces(textposition="top center")
@@ -117,8 +126,12 @@ st.plotly_chart(fig_scatter, use_container_width=True)
 
 with st.expander("Voir les données"):
     st.dataframe(
-        df.sort_values("Coefficient", ascending=False).style.format(
-            {"nombre": "{:,.0f}", "Coefficient": "{:.2f}"}
+        df.sort_values("Coefficient favorable", ascending=False).style.format(
+            {
+                "nombre": "{:,.0f}",
+                "Crimes pour 1000 habitants": "{:.1f}",
+                "Coefficient favorable": "{:.1f}",
+            }
         ),
         use_container_width=True,
     )
