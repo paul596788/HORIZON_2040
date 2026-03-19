@@ -63,6 +63,7 @@ themes = {
     "Internet": "Score internet",
     "Criminalité": "Score criminalité",
     "Éducation": "Score éducation",
+    "Transition démographique": "Score transition démographique",
     "Immobilier": "Score immobilier",
 }
 
