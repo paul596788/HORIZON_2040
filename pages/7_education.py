@@ -32,24 +32,24 @@ colonnes_num = [
 for colonne in colonnes_num:
     df[colonne] = pd.to_numeric(df[colonne], errors="coerce")
 
-df["Taux étudiants 2024 (%)"] = df["nb_stud_total"] / df["POP_2024"] * 100
-df["Taux étudiants 2040 (%)"] = df["nb_stud_total_2040"] / df["POP_2040"] * 100
-df["Évolution étudiants (%)"] = df["nb_student_change_pct"] * 100
+df["Taux élèves 2024 (%)"] = df["nb_stud_total"] / df["POP_2024"] * 100
+df["Taux élèves 2040 (%)"] = df["nb_stud_total_2040"] / df["POP_2040"] * 100
+df["Évolution élèves (%)"] = df["nb_student_change_pct"] * 100
 df["Évolution population (%)"] = df["pop_change_pct"] * 100
 df["Coefficient (%)"] = df["coefficient"] * 100
 
 indicateurs = {
     "Coefficient": "Coefficient (%)",
-    "Étudiants 2024": "nb_stud_total",
-    "Étudiants 2040": "nb_stud_total_2040",
-    "Taux étudiants / population 2024": "Taux étudiants 2024 (%)",
+    "Élèves 2024": "nb_stud_total",
+    "Élèves 2040": "nb_stud_total_2040",
+    "Taux élèves / population 2024": "Taux élèves 2024 (%)",
 }
 indicateur = st.selectbox("Indicateur affiché sur la carte", list(indicateurs.keys()))
 colonne_carte = indicateurs[indicateur]
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Départements couverts", f"{df['Département'].nunique()}")
-col2.metric("Étudiants 2024 moyens", f"{df['nb_stud_total'].mean():,.0f}".replace(",", " "))
+col2.metric("Élèves 2024 moyens", f"{df['nb_stud_total'].mean():,.0f}".replace(",", " "))
 col3.metric(
     "Meilleur coefficient",
     df.sort_values("Coefficient (%)", ascending=False).iloc[0]["Département"],
@@ -66,13 +66,13 @@ fig_carte = px.choropleth(
         "nb_stud_total": ":,.0f",
         "POP_2024": ":,.0f",
         "nb_stud_total_2040": ":,.0f",
-        "Taux étudiants 2024 (%)": ":.2f",
+        "Taux élèves 2024 (%)": ":.2f",
         "Coefficient (%)": ":.1f",
     },
     color_continuous_scale="YlGnBu",
     labels={
-        "nb_stud_total": "Étudiants 2024",
-        "nb_stud_total_2040": "Étudiants 2040",
+        "nb_stud_total": "Élèves 2024",
+        "nb_stud_total_2040": "Élèves 2040",
         "POP_2024": "Population 2024",
         "Coefficient (%)": "Coefficient (%)",
     },
@@ -107,14 +107,14 @@ fig_coef.update_layout(
 fig_coef.update_yaxes(categoryorder="total ascending")
 gauche.plotly_chart(fig_coef, use_container_width=True)
 
-top_ratio = df.sort_values("Taux étudiants 2024 (%)", ascending=False).head(15)
+top_ratio = df.sort_values("Taux élèves 2024 (%)", ascending=False).head(15)
 fig_ratio = px.bar(
     top_ratio,
-    x="Taux étudiants 2024 (%)",
+    x="Taux élèves 2024 (%)",
     y="Département",
     orientation="h",
-    color="Taux étudiants 2024 (%)",
-    title="Part des étudiants dans la population en 2024",
+    color="Taux élèves 2024 (%)",
+    title="Part des élèves dans la population en 2024",
     color_continuous_scale="Tealgrn",
 )
 fig_ratio.update_layout(
@@ -132,11 +132,11 @@ fig_scatter = px.scatter(
     size="nb_stud_total_2040",
     color="Coefficient (%)",
     hover_name="Département",
-    title="Étudiants 2024, population départementale et projection 2040",
+    title="Élèves 2024, population départementale et projection 2040",
     labels={
         "POP_2024": "Population 2024",
-        "nb_stud_total": "Étudiants 2024",
-        "nb_stud_total_2040": "Étudiants 2040",
+        "nb_stud_total": "Élèves 2024",
+        "nb_stud_total_2040": "Élèves 2040",
     },
     color_continuous_scale="Viridis",
 )
@@ -156,7 +156,7 @@ with st.expander("Voir les données"):
                 "nb_stud_total",
                 "POP_2024",
                 "nb_stud_total_2040",
-                "Taux étudiants 2024 (%)",
+                "Taux élèves 2024 (%)",
                 "Coefficient (%)",
             ]
         ]
@@ -166,7 +166,7 @@ with st.expander("Voir les données"):
                 "nb_stud_total": "{:,.0f}",
                 "POP_2024": "{:,.0f}",
                 "nb_stud_total_2040": "{:,.0f}",
-                "Taux étudiants 2024 (%)": "{:.2f}",
+                "Taux élèves 2024 (%)": "{:.2f}",
                 "Coefficient (%)": "{:.1f}",
             }
         ),
