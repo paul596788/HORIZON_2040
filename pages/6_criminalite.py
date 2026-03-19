@@ -12,6 +12,12 @@ st.title("Criminalité projetée par département")
 df = charger_csv("pages/tables/CrimebyDept_2040.csv")
 geojson_departements = charger_geojson("pages/tables/departements.geojson")
 
+df.columns = [str(col).strip() for col in df.columns]
+if "Coefficient" in df.columns and "coefficient" not in df.columns:
+    df = df.rename(columns={"Coefficient": "coefficient"})
+if "taux_pour_mille_2040" not in df.columns:
+    df["taux_pour_mille_2040"] = pd.NA
+
 df["num_dep"] = df["num_dep"].astype(str).str.zfill(2)
 df["nombre"] = pd.to_numeric(df["nombre"], errors="coerce")
 df["coefficient"] = pd.to_numeric(df["coefficient"], errors="coerce")
@@ -19,21 +25,35 @@ df["taux_pour_mille_2040"] = pd.to_numeric(df["taux_pour_mille_2040"], errors="c
 df["Coefficient favorable"] = (1 - df["coefficient"]) * 100
 df["Crimes pour 1000 habitants"] = df["taux_pour_mille_2040"] * 1000
 
+has_rate = df["Crimes pour 1000 habitants"].notna().any()
 indicateurs = {
     "Nombre de crimes projetés": "nombre",
-    "Crimes pour 1000 habitants": "Crimes pour 1000 habitants",
     "Score sécurité": "Coefficient favorable",
 }
+if has_rate:
+    indicateurs["Crimes pour 1000 habitants"] = "Crimes pour 1000 habitants"
+
 indicateur = st.selectbox("Indicateur affiché sur la carte", list(indicateurs.keys()))
 colonne_carte = indicateurs[indicateur]
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Départements couverts", f"{df['dep_name'].nunique()}")
-col2.metric("Crimes moyens pour 1000 hab.", f"{df['Crimes pour 1000 habitants'].mean():.1f}")
+if has_rate:
+    col2.metric("Crimes moyens pour 1000 hab.", f"{df['Crimes pour 1000 habitants'].mean():.1f}")
+else:
+    col2.metric("Crimes moyens pour 1000 hab.", "N/A")
 col3.metric(
     "Département le plus sûr",
     df.sort_values("Coefficient favorable", ascending=False).iloc[0]["dep_name"],
 )
+
+hover_data = {
+    "num_dep": True,
+    "nombre": ":,",
+    "Coefficient favorable": ":.1f",
+}
+if has_rate:
+    hover_data["Crimes pour 1000 habitants"] = ":.1f"
 
 fig_carte = px.choropleth(
     df,
@@ -42,12 +62,7 @@ fig_carte = px.choropleth(
     featureidkey="properties.nom",
     color=colonne_carte,
     hover_name="dep_name",
-    hover_data={
-        "num_dep": True,
-        "nombre": ":,",
-        "Crimes pour 1000 habitants": ":.1f",
-        "Coefficient favorable": ":.1f",
-    },
+    hover_data=hover_data,
     color_continuous_scale="YlOrRd" if colonne_carte != "Coefficient favorable" else "YlGn",
     labels={
         "nombre": "Crimes projetés",
@@ -73,7 +88,7 @@ fig_top = px.bar(
     x="nombre",
     y="dep_name",
     orientation="h",
-    color="Crimes pour 1000 habitants",
+    color="Crimes pour 1000 habitants" if has_rate else "Coefficient favorable",
     title="Départements avec le plus de crimes projetés",
     labels={"dep_name": "Département", "nombre": "Crimes projetés"},
     color_continuous_scale="YlOrRd_r",
@@ -107,7 +122,7 @@ droite.plotly_chart(fig_safe, use_container_width=True)
 
 fig_scatter = px.scatter(
     df.sort_values("Coefficient favorable"),
-    x="Crimes pour 1000 habitants",
+    x="Crimes pour 1000 habitants" if has_rate else "Coefficient favorable",
     y="nombre",
     hover_name="dep_name",
     text="num_dep",

@@ -107,6 +107,7 @@ with st.expander("Méthodologie & sources", expanded=False):
         st.markdown(
             """
 ### Vulnérabilité démographique
+
 L’indice mesure la structure d’âge des territoires à partir d’un indicateur simple de vieillissement.
 
 ```text
@@ -128,7 +129,6 @@ Pourquoi c’est utile :
             """
 ### Sources
 - INSEE — données démographiques
-- Météo-France / DRIAS — indicateurs thermiques 2040
 """
         )
 

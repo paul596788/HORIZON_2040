@@ -74,6 +74,129 @@ st.caption(
     "Évaluation des risques climatiques par département : lecture cartographique, comparaison rapide et profils territoriaux."
 )
 
+with st.expander("Méthodologie & sources", expanded=False):
+    tab_methodo, tab_sources = st.tabs(["Méthodologie", "Sources"])
+
+    with tab_methodo:
+        st.markdown(
+            """
+### Analyse des risques climatiques territoriaux
+
+L’étude évalue la vulnérabilité climatique des territoires à partir de trois dimensions principales :
+
+- stress thermique
+- stress hydrique
+- risque d’inondation
+
+### Stress thermique
+
+L’indice mesure l’intensité des épisodes de chaleur extrême.
+
+```text
+score_temperature =
+0.6 × nuits tropicales +
+0.4 × jours > 35°C
+```
+
+**Nuits tropicales (0.6)**
+
+- Température minimale ≥ 20 °C
+- Multiplication par 2 à 5 depuis les années 1960
+- Projections : +10 à +30 nuits/an d’ici 2050
+
+**Jours > 35 °C (0.4)**
+
+- Risques sanitaires
+- Stress thermique des cultures
+- Hausse de la demande énergétique
+- Projection : ×3 à ×5 en Europe occidentale
+
+### Stress hydrique
+
+L’indice mesure la pression sur la ressource en eau.
+
+```text
+score_water =
+0.40 × (1 - précipitations estivales) +
+0.30 × (1 - humidité du sol) +
+0.20 × volume d'extraction
+```
+
+**Précipitations estivales (0.40)**
+
+- 50–70 % de l’évapotranspiration annuelle
+- −10 à −30 % d’ici 2050
+
+**Humidité du sol (0.30)**
+
+- Reflète l’équilibre hydrique
+- `(1 − humidité)` = déficit hydrique
+
+**Extraction d’eau (0.20)**
+
+- ≈70 % agriculture, ≈20 % industrie, ≈10 % domestique
+- Plus de 80 départements en restriction lors des sécheresses récentes
+
+### Risque d’inondation
+
+Les inondations représentent 56 % des catastrophes naturelles en France, soit environ 18 M de personnes exposées.
+
+```text
+score_flood =
+0.70 × score_scena_risque_normalise +
+0.30 × score_land_perc
+```
+
+**score_scena_risque_normalise (70 %)**
+
+- représente le risque issu du scénario d’inondation
+- correspond à la composante la plus structurante du score
+
+**score_land_perc (30 %)**
+
+- représente une caractéristique territoriale liée à l’exposition ou à l’occupation du sol
+- vient moduler le risque simulé selon le contexte local
+
+Lecture :
+
+- 70 % du score viennent du risque simulé
+- 30 % viennent de la composante territoriale
+- le résultat final est une moyenne pondérée entre aléa et vulnérabilité du territoire
+"""
+        )
+
+    with tab_sources:
+        st.markdown(
+            """
+### Méthodologie générale
+
+L’approche repose sur des **indices composites** :
+
+- combinaison de variables représentatives d’un même phénomène
+- pondérations issues de la littérature scientifique
+- objectif : conserver une lecture simple et interprétable
+
+Le modèle couvre quatre mécanismes majeurs :
+
+- stress thermique
+- stress hydrique
+- risque d’inondation
+- vulnérabilité démographique
+
+Il capture environ **80 % des dynamiques territoriales** tout en restant synthétique.
+
+### Sources
+
+- DRIAS — projections climatiques (2035–2045)
+- Météo-France — indicateurs climatiques
+- BRGM — hydrologie
+- BNPE — prélèvements d’eau
+- INSEE — démographie
+- data.gouv.fr — données ouvertes
+- TRI — territoires à risque d’inondation
+"""
+        )
+
 # -----------------------------
 # Load data
 # -----------------------------

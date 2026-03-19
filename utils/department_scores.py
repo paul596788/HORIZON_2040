@@ -304,6 +304,11 @@ def _score_internet():
 
 def _score_criminalite():
     df = charger_csv("pages/tables/CrimebyDept_2040.csv")
+    df.columns = [str(col).strip() for col in df.columns]
+    if "Coefficient" in df.columns and "coefficient" not in df.columns:
+        df = df.rename(columns={"Coefficient": "coefficient"})
+    if "taux_pour_mille_2040" not in df.columns:
+        df["taux_pour_mille_2040"] = pd.NA
     df["coefficient"] = pd.to_numeric(df["coefficient"], errors="coerce")
     df["nombre"] = pd.to_numeric(df["nombre"], errors="coerce")
     df["taux_pour_mille_2040"] = pd.to_numeric(df["taux_pour_mille_2040"], errors="coerce")
