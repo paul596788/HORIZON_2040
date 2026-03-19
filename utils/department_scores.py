@@ -304,11 +304,12 @@ def _score_internet():
 
 def _score_criminalite():
     df = charger_csv("pages/tables/CrimebyDept_2040.csv")
-    df["Coefficient"] = pd.to_numeric(df["Coefficient"], errors="coerce")
+    df["coefficient"] = pd.to_numeric(df["coefficient"], errors="coerce")
     df["nombre"] = pd.to_numeric(df["nombre"], errors="coerce")
-    df["Score criminalité"] = _normaliser_serie(df["Coefficient"]).round(4)
+    df["taux_pour_mille_2040"] = pd.to_numeric(df["taux_pour_mille_2040"], errors="coerce")
+    df["Score criminalité"] = (1 - _normaliser_serie(df["coefficient"])).round(4)
     return df.rename(columns={"dep_name": "Département"})[
-        ["Département", "Score criminalité", "Coefficient", "nombre"]
+        ["Département", "Score criminalité", "coefficient", "nombre", "taux_pour_mille_2040"]
     ]
 
 
