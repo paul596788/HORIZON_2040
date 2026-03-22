@@ -161,10 +161,10 @@ with st.expander("🌐 Le concept", expanded=False):
   <div class="concept-kicker">Le concept</div>
   <div class="concept-title">Un outil d’aide à la décision territoriale construit à partir de données publiques, traçables et comparables.</div>
   <div class="concept-body">
-    HORIZON 2040 agrège des indicateurs climatiques, démographiques, économiques, sanitaires,
-    immobiliers, éducatifs, numériques et territoriaux afin de produire une lecture synthétique
-    des départements français. L’utilisateur ajuste le poids de chaque critère selon son scénario
-    d’usage : implantation, investissement, attractivité ou qualité de vie.
+    HORIZON 2040 croise des projections climatiques, des données démographiques, économiques,
+    sanitaires, immobilières et territoriales pour comparer les départements français. L’utilisateur
+    ajuste les pondérations selon son scénario d’usage : implantation, investissement, attractivité
+    ou qualité de vie.
   </div>
   <div class="trust-grid">
     <div class="trust-card">
@@ -190,46 +190,46 @@ with st.expander("Méthodologie, fiabilité et sources", expanded=False):
         """
 ### Cadre d’utilisation
 
-- **Finalité** : HORIZON 2040 est un outil d’aide à la décision territoriale destiné à l’exploration, à la comparaison et à la priorisation de départements.
-- **Méthode** : les indicateurs sont harmonisés, normalisés puis agrégés dans un score composite pondérable par l’utilisateur.
+- **Finalité** : HORIZON 2040 est un outil d’aide à la décision territoriale destiné à explorer, comparer et prioriser les départements selon différents critères d’attractivité, de résilience et de qualité de vie.
+- **Méthode** : les indicateurs sont collectés à partir de sources publiques de référence, harmonisés à l’échelle départementale, puis normalisés avant d’être agrégés dans un score composite. Ce score peut être ajusté selon les pondérations définies par l’utilisateur.
 - **Public visé** : particuliers, investisseurs, décideurs publics, analystes territoriaux et acteurs de l’attractivité.
-- **Prudence de lecture** : l’outil ne remplace ni une étude réglementaire, ni un audit local, ni une expertise métier. Il permet une lecture structurée et comparable des territoires.
+- **Prudence de lecture** : l’outil ne remplace ni une étude réglementaire, ni un audit local, ni une expertise métier. Il permet une lecture structurée, comparative et synthétique des territoires.
 
 ### Principes de fiabilité
 
 - **Traçabilité** : recours à des sources publiques, institutionnelles ou de référence.
-- **Comparabilité** : lecture homogène des indicateurs à l’échelle départementale.
-- **Transparence** : pondérations ajustables selon le scénario d’usage.
-- **Robustesse** : croisement de dimensions complémentaires, sans se limiter à un seul indicateur.
+- **Comparabilité** : lecture homogène des indicateurs à l’échelle départementale afin de permettre des comparaisons cohérentes entre territoires.
+- **Transparence** : pondérations ajustables selon le scénario d’usage ou les priorités de l’utilisateur.
+- **Robustesse** : croisement de dimensions complémentaires (climat, immobilier, emploi, santé, sécurité, infrastructures, ressources) afin d’éviter une lecture partielle fondée sur un seul indicateur.
 
 ### Sources statistiques générales
 
 - **INSEE**. Institut national de la statistique et des études économiques. Données sur la démographie, l’économie, l’emploi, les revenus et le logement. [https://www.insee.fr](https://www.insee.fr)
-- **data.gouv.fr**. Plateforme ouverte des données publiques françaises. Agrégation de bases issues de ministères, collectivités et organismes publics. [https://www.data.gouv.fr](https://www.data.gouv.fr)
+- **data.gouv.fr**. Plateforme ouverte des données publiques françaises, regroupant de nombreuses bases issues de ministères, collectivités et organismes publics. [https://www.data.gouv.fr](https://www.data.gouv.fr)
 - **OpenDataFrance**. Données territoriales et locales produites par les collectivités. [https://www.opendatafrance.net](https://www.opendatafrance.net)
 
 ### Climat et environnement
 
-- **Météo-France**. Données météorologiques historiques et en temps réel. [https://donneespubliques.meteofrance.fr](https://donneespubliques.meteofrance.fr)
+- **Météo-France**. Données météorologiques historiques et observations climatiques. [https://donneespubliques.meteofrance.fr](https://donneespubliques.meteofrance.fr)
+- **DRIAS, les futurs du climat**. Données de projection climatique permettant d’anticiper les évolutions futures du climat. Dans HORIZON 2040, les indicateurs prospectifs issus de DRIAS correspondent à une moyenne lissée sur la période 2035-2045, utilisée comme approximation du climat futur à horizon 2040. [https://www.drias-climat.fr](https://www.drias-climat.fr)
 - **ADEME**. Données sur l’énergie, les émissions, les déchets et la transition écologique. [https://data.ademe.fr](https://data.ademe.fr)
 - **Géorisques**. Bases de données sur les risques naturels et technologiques. [https://www.georisques.gouv.fr](https://www.georisques.gouv.fr)
 
 ### Immobilier et logement
 
-- **Demandes de Valeurs Foncières (DVF)**. Transactions immobilières. [https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres](https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres)
+- **Demandes de Valeurs Foncières (DVF)**. Données sur les transactions immobilières. [https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres](https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres)
 - **INSEE**. Statistiques sur le parc immobilier, les loyers et la construction. [https://www.insee.fr](https://www.insee.fr)
-- **DataFrance**. Indicateurs territoriaux incluant immobilier et attractivité. [https://datafrance.info](https://datafrance.info)
+- **DataFrance**. Indicateurs territoriaux incluant immobilier, attractivité et dynamiques locales. [https://datafrance.info](https://datafrance.info)
 
 ### Emploi et économie
 
-- **Pôle emploi**. Données sur le marché du travail.
-- **URSSAF**. Données sur les salaires et l’activité économique.
-- **Banque de France**. Données macroéconomiques, entreprises et crédit.
+- **France Travail / ex-Pôle emploi**. Données sur le marché du travail et les dynamiques de l’emploi.
+- **URSSAF**. Données sur les salaires, l’emploi et l’activité économique.
 
 ### Santé publique
 
 - **Santé publique France**. Indicateurs sanitaires, épidémiologie et prévention.
-- **Assurance Maladie**. Données sur les dépenses de santé et les soins.
+- **Assurance Maladie**. Données sur les soins, les dépenses de santé et l’accès aux services médicaux.
 
 ### Criminalité et sécurité
 
@@ -243,18 +243,13 @@ with st.expander("Méthodologie, fiabilité et sources", expanded=False):
 
 ### Ressources en eau
 
-- **BNPE**. Banque Nationale des Prélèvements en Eau. Données sur les prélèvements d’eau par secteur.
+- **TRI**. Données relatives à l’état, aux tensions et aux enjeux territoriaux liés à la ressource en eau.
+- **BNPE**. Banque Nationale des Prélèvements en Eau. Données sur les prélèvements d’eau par secteur d’usage.
 
 ### Données géographiques
 
 - **IGN**. Données cartographiques, topographiques et géolocalisées.
 - **Base Adresse Nationale**. Référentiel officiel des adresses géolocalisées.
-
-### Sources internationales complémentaires
-
-- **Eurostat**. Données statistiques comparatives à l’échelle européenne.
-- **OCDE**. Indicateurs économiques et sociaux internationaux.
-- **CEPII**. Analyses et bases de données sur le commerce international.
 """
     )
 
