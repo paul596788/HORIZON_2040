@@ -2,7 +2,14 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from utils.excel_helpers import charger_csv, charger_geojson
+from utils.excel_helpers import (
+    ajouter_surlignage_departements,
+    charger_csv,
+    charger_geojson,
+    get_global_department_selection,
+    render_global_department_selector,
+    styliser_carte_departements,
+)
 
 
 st.set_page_config(page_title="Transition démographique 2040", layout="wide")
@@ -100,6 +107,9 @@ st.caption(
     "Le vieillissement de la population redessine les dynamiques territoriales et crée "
     "des déséquilibres structurels entre départements."
 )
+render_global_department_selector(
+    caption="La sélection est partagée entre les pages. Les départements choisis sont surlignés sur la carte et filtrent les tableaux analytiques."
+)
 
 with st.expander("Méthodologie & sources", expanded=False):
     tab_methodo, tab_sources = st.tabs(["Méthodologie", "Sources"])
@@ -166,25 +176,29 @@ df = (
 df["Departement"] = df["code"].map(geo_names).fillna(df["Departement"])
 df = df[df["code"].isin(geo_names)].copy()
 df["departement_label"] = df["Departement"] + " (" + df["code"] + ")"
+departements_selectionnes = get_global_department_selection(df["Departement"].dropna().unique())
+analysis_df = df[df["Departement"].isin(departements_selectionnes)].copy() if departements_selectionnes else df.copy()
 
-age_mean = float(df["indice_vieillissement"].mean())
-age_median = float(df["indice_vieillissement"].median())
-age_std = float(df["indice_vieillissement"].std())
-comfort_median = float(df["confort_thermique_2040"].median())
-df["profil_strategique"] = df.apply(_quadrant, axis=1, x_cut=comfort_median, y_cut=age_median)
-df["double_pression_score"] = (
-    (1 - df["indice_vieillissement"]) + (1 - df["confort_thermique_2040"])
+age_mean = float(analysis_df["indice_vieillissement"].mean())
+age_median = float(analysis_df["indice_vieillissement"].median())
+age_std = float(analysis_df["indice_vieillissement"].std())
+comfort_median = float(analysis_df["confort_thermique_2040"].median())
+analysis_df["profil_strategique"] = analysis_df.apply(_quadrant, axis=1, x_cut=comfort_median, y_cut=age_median)
+analysis_df["double_pression_score"] = (
+    (1 - analysis_df["indice_vieillissement"]) + (1 - analysis_df["confort_thermique_2040"])
 )
 
-youngest_df = df.nlargest(5, "indice_vieillissement").copy()
-oldest_df = df.nsmallest(5, "indice_vieillissement").copy()
-double_tension_df = df[df["profil_strategique"] == "Double tension"].copy()
+youngest_df = analysis_df.nlargest(5, "indice_vieillissement").copy()
+oldest_df = analysis_df.nsmallest(5, "indice_vieillissement").copy()
+double_tension_df = analysis_df[analysis_df["profil_strategique"] == "Double tension"].copy()
 double_tension_count = int(len(double_tension_df))
 
 aging_color_scale = [
-    (0.0, "#0b1730"),
-    (0.48, "#7e8796"),
-    (1.0, "#b87333"),
+    (0.0, "#10213f"),
+    (0.28, "#46536b"),
+    (0.54, "#7c8aa3"),
+    (0.78, "#a78d74"),
+    (1.0, "#c78b52"),
 ]
 
 fig_map = px.choropleth(
@@ -211,26 +225,16 @@ fig_map.update_traces(
         "Indice démographique: %{customdata[2]:.3f}<extra></extra>"
     ),
 )
-fig_map.update_layout(
-    template="plotly_dark",
+fig_map = styliser_carte_departements(
+    fig_map,
+    demography_label_with_hint,
     height=640,
-    margin=dict(l=0, r=0, t=0, b=0),
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font={"color": "#e8edf2"},
-    coloraxis_colorbar={
-        "title": {"text": demography_label_with_hint, "font": {"color": "#e8edf2"}},
-        "tickfont": {"color": "#cfd6df"},
-        "bgcolor": "rgba(0,0,0,0)",
-        "len": 0.8,
-        "thickness": 14,
-        "outlinewidth": 0,
-    },
-    hoverlabel={
-        "bgcolor": "#0f172a",
-        "font_color": "#f8fafc",
-        "bordercolor": "rgba(255,255,255,0.15)",
-    },
+)
+fig_map = ajouter_surlignage_departements(
+    fig_map,
+    departements,
+    analysis_df["code"].tolist() if departements_selectionnes else [],
+    "properties.code",
 )
 st.plotly_chart(fig_map, use_container_width=True)
 st.caption(
@@ -247,7 +251,7 @@ metric_3.metric("Dispersion", f"{age_std:.3f}")
 st.caption("Plus le score est proche de 1, plus le département est jeune.")
 
 fig_hist = px.histogram(
-    df,
+    analysis_df,
     x="indice_vieillissement",
     nbins=18,
     color_discrete_sequence=["#b87333"],
@@ -340,7 +344,7 @@ quadrant_colors = {
     "Profil plus favorable": "#22c55e",
 }
 fig_scatter = px.scatter(
-    df,
+    analysis_df,
     x="confort_thermique_2040",
     y="indice_vieillissement",
     color="profil_strategique",

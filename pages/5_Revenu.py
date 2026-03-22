@@ -2,10 +2,18 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from utils.excel_helpers import charger_excel, nettoyer_colonnes
+from utils.excel_helpers import (
+    charger_excel,
+    get_global_department_selection,
+    nettoyer_colonnes,
+    render_global_department_selector,
+)
 
 
 st.title("Niveaux de vie et pauvreté")
+render_global_department_selector(
+    caption="La sélection est partagée entre les pages. Elle s'applique ici lorsque l'analyse est en mode départements."
+)
 
 chemin_fichier = "pages/tables/revenu/base-cc-filosofi-2021-geo2025.xlsx"
 df_reg = nettoyer_colonnes(charger_excel(chemin_fichier, sheet_name="REG"))
@@ -29,6 +37,11 @@ indicateur = col2.selectbox("Indicateur", mesures)
 df_actuel = df_reg if niveau_geo == "Régions" else df_dep
 nom_geo = "Géographie"
 top_n = 15 if niveau_geo == "Régions" else 20
+
+if niveau_geo == "Départements":
+    departements_selectionnes = get_global_department_selection(df_dep[nom_geo].dropna().unique())
+    if departements_selectionnes:
+        df_actuel = df_dep[df_dep[nom_geo].isin(departements_selectionnes)].copy()
 
 resume = df_actuel[indicateur].dropna()
 met1, met2, met3 = st.columns(3)
@@ -65,9 +78,17 @@ fig_dispersion = px.scatter(
 )
 st.plotly_chart(fig_dispersion, use_container_width=True)
 
+selection_options = classement[nom_geo].tolist()
+selection_index = 0
+if niveau_geo == "Départements":
+    departements_selectionnes = get_global_department_selection(selection_options)
+    if departements_selectionnes:
+        selection_index = selection_options.index(departements_selectionnes[0])
+
 selection_geo = st.selectbox(
     f"Comparer un {niveau_geo[:-1].lower()}",
-    classement[nom_geo].tolist(),
+    selection_options,
+    index=selection_index,
 )
 
 ligne = df_actuel[df_actuel[nom_geo] == selection_geo].iloc[0]

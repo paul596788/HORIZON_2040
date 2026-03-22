@@ -2,10 +2,19 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from utils.excel_helpers import charger_excel, colonnes_sans_unnamed, nettoyer_colonnes
+from utils.excel_helpers import (
+    charger_excel,
+    colonnes_sans_unnamed,
+    get_global_department_selection,
+    nettoyer_colonnes,
+    render_global_department_selector,
+)
 
 
 st.title("Accès aux soins et offre de santé")
+render_global_department_selector(
+    caption="La sélection est partagée entre les pages. Elle pilote ici les comparaisons départementales."
+)
 
 fichier_sante = "pages/tables/sante/santé_data.xlsx"
 fichier_hopital = "pages/tables/sante/analyse_acces_hopital_2010.xlsx"
@@ -50,6 +59,7 @@ df_cpts["Taux de la couverture\nde la population\npar une CPTS"] = pd.to_numeric
     df_cpts["Taux de la couverture\nde la population\npar une CPTS"], errors="coerce"
 ) * 100
 departements_specialistes = set(df_medecins_s["Département"].dropna())
+departements_selectionnes = get_global_department_selection(df_medecins_g["Département"].dropna().unique())
 
 onglet1, onglet2, onglet3 = st.tabs(
     ["Médecins", "Hospitalisation", "Accès territorial"]
@@ -67,9 +77,10 @@ with onglet1:
     classement = (
         df_medecins[["Départements", colonne_2020, colonne_2021]]
         .dropna()
-        .sort_values(colonne_2021, ascending=False)
-        .head(20)
     )
+    if departements_selectionnes:
+        classement = classement[classement["Départements"].isin(departements_selectionnes)]
+    classement = classement.sort_values(colonne_2021, ascending=False).head(20)
 
     fig_medecins = px.bar(
         classement,
@@ -82,7 +93,17 @@ with onglet1:
     fig_medecins.update_xaxes(tickangle=-45)
     st.plotly_chart(fig_medecins, use_container_width=True)
 
-    departement = st.selectbox("Département à comparer", sorted(df_medecins_g["Département"].dropna().unique()))
+    departement_options = sorted(df_medecins_g["Département"].dropna().unique())
+    if departements_selectionnes:
+        departement_options = [dep for dep in departement_options if dep in departements_selectionnes]
+    departement_index = 0
+    if departements_selectionnes and departements_selectionnes[0] in departement_options:
+        departement_index = departement_options.index(departements_selectionnes[0])
+    departement = st.selectbox(
+        "Département à comparer",
+        departement_options,
+        index=departement_index,
+    )
     historique = pd.DataFrame(
         {
             "Année": [2012, 2014, 2024, 2012, 2014, 2024],

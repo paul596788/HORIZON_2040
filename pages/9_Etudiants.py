@@ -2,7 +2,12 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from utils.excel_helpers import charger_excel, nettoyer_colonnes
+from utils.excel_helpers import (
+    charger_excel,
+    get_global_department_selection,
+    nettoyer_colonnes,
+    render_global_department_selector,
+)
 
 
 st.title("Effectifs étudiants")
@@ -17,13 +22,13 @@ df["Nombre total d’étudiants inscrits"] = pd.to_numeric(
 df["Année civile concernée"] = pd.to_numeric(df["Année civile concernée"], errors="coerce")
 
 departements = sorted(df["Département"].dropna().unique())
-departement_selection = st.multiselect(
-    "Départements à afficher",
-    departements,
-    default=departements[:1],
+render_global_department_selector(
+    caption="La sélection est partagée entre les pages. Sans sélection, la page affiche un département repère."
 )
+departement_selection = get_global_department_selection(departements) or departements[:1]
 
 df_filtre = df[df["Département"].isin(departement_selection)] if departement_selection else df.copy()
+annee_reference = int(df["Année civile concernée"].dropna().max())
 
 serie_departements = (
     df_filtre.groupby(["Année civile concernée", "Département"], as_index=False)[
@@ -32,13 +37,23 @@ serie_departements = (
     .sum()
     .sort_values("Année civile concernée")
 )
+leader_etudiants = (
+    df_filtre[df_filtre["Année civile concernée"] == annee_reference]
+    .groupby("Département", as_index=False)["Nombre total d’étudiants inscrits"]
+    .sum()
+    .sort_values("Nombre total d’étudiants inscrits", ascending=False)
+    .iloc[0]
+)
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Départements affichés", f"{df_filtre['Département'].nunique()}")
-col2.metric("Régions couvertes", f"{df_filtre['Région'].nunique()}")
-col3.metric(
+col1.metric(
     "Étudiants 2024",
     f"{int(serie_departements[serie_departements['Année civile concernée'] == 2024]['Nombre total d’étudiants inscrits'].sum()):,}".replace(",", " "),
+)
+col2.metric("Meilleur département", leader_etudiants["Département"])
+col3.metric(
+    "Score du leader",
+    f"{int(leader_etudiants['Nombre total d’étudiants inscrits']):,}".replace(",", " "),
 )
 
 fig_evolution = px.line(
@@ -54,7 +69,6 @@ fig_evolution = px.line(
 )
 st.plotly_chart(fig_evolution, use_container_width=True)
 
-annee_reference = int(df["Année civile concernée"].dropna().max())
 departements_annee = (
     df_filtre[df_filtre["Année civile concernée"] == annee_reference]
     .groupby("Département", as_index=False)["Nombre total d’étudiants inscrits"]
@@ -80,9 +94,15 @@ communes_departement = (
     .sum()
 )
 
+departement_focus_options = sorted(communes_departement["Département"].dropna().unique())
+departement_focus_default = 0
+if departement_selection and departement_selection[0] in departement_focus_options:
+    departement_focus_default = departement_focus_options.index(departement_selection[0])
+
 departement_focus = st.selectbox(
     f"Zoom sur les communes en {annee_reference}",
-    sorted(communes_departement["Département"].dropna().unique()),
+    departement_focus_options,
+    index=departement_focus_default,
 )
 
 top_communes = (

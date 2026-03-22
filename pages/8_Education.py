@@ -5,9 +5,19 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from utils.excel_helpers import charger_csv, charger_geojson
+from utils.excel_helpers import (
+    ajouter_surlignage_departements,
+    charger_csv,
+    charger_geojson,
+    get_global_department_selection,
+    render_global_department_selector,
+    styliser_carte_departements,
+)
 
 st.title("Éducation et dynamique étudiante")
+render_global_department_selector(
+    caption="La sélection est partagée entre les pages. Les départements choisis sont surlignés sur la carte et filtrent les graphiques."
+)
 
 geojson_departements = charger_geojson("pages/tables/departements.geojson")
 code_to_name = {
@@ -37,6 +47,8 @@ df["Taux élèves 2040 (%)"] = df["nb_stud_total_2040"] / df["POP_2040"] * 100
 df["Évolution élèves (%)"] = df["nb_student_change_pct"] * 100
 df["Évolution population (%)"] = df["pop_change_pct"] * 100
 df["Coefficient (%)"] = df["coefficient"] * 100
+departements_selectionnes = get_global_department_selection(df["Département"].dropna().unique())
+df_scope = df[df["Département"].isin(departements_selectionnes)].copy() if departements_selectionnes else df.copy()
 
 indicateurs = {
     "Coefficient": "Coefficient (%)",
@@ -46,14 +58,19 @@ indicateurs = {
 }
 indicateur = st.selectbox("Indicateur affiché sur la carte", list(indicateurs.keys()))
 colonne_carte = indicateurs[indicateur]
+leader_education = df_scope.sort_values("Coefficient (%)", ascending=False).iloc[0]
+education_scale = [
+    (0.0, "#f8fafc"),
+    (0.22, "#d7f1ea"),
+    (0.48, "#8ad7c4"),
+    (0.74, "#2ea39b"),
+    (1.0, "#155e75"),
+]
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Départements couverts", f"{df['Département'].nunique()}")
-col2.metric("Élèves 2024 moyens", f"{df['nb_stud_total'].mean():,.0f}".replace(",", " "))
-col3.metric(
-    "Meilleur coefficient",
-    df.sort_values("Coefficient (%)", ascending=False).iloc[0]["Département"],
-)
+col1.metric("Élèves 2024 moyens", f"{df_scope['nb_stud_total'].mean():,.0f}".replace(",", " "))
+col2.metric("Meilleur département", leader_education["Département"])
+col3.metric("Score du leader", f"{leader_education['Coefficient (%)']:.1f}%")
 
 fig_carte = px.choropleth(
     df.dropna(subset=["Département"]),
@@ -69,27 +86,31 @@ fig_carte = px.choropleth(
         "Taux élèves 2024 (%)": ":.2f",
         "Coefficient (%)": ":.1f",
     },
-    color_continuous_scale="YlGnBu",
     labels={
         "nb_stud_total": "Élèves 2024",
         "nb_stud_total_2040": "Élèves 2040",
         "POP_2024": "Population 2024",
         "Coefficient (%)": "Coefficient (%)",
     },
+    color_continuous_scale=education_scale,
 )
-fig_carte.update_geos(fitbounds="locations", visible=False, projection={"type": "mercator"})
-fig_carte.update_layout(
-    template="plotly_dark",
+fig_carte = styliser_carte_departements(
+    fig_carte,
+    indicateur,
     height=700,
-    margin={"l": 0, "r": 0, "t": 10, "b": 0},
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
+    tickformat=",.0f" if colonne_carte in {"nb_stud_total", "nb_stud_total_2040"} else ".1f",
+)
+fig_carte = ajouter_surlignage_departements(
+    fig_carte,
+    geojson_departements,
+    departements_selectionnes,
+    "properties.nom",
 )
 st.plotly_chart(fig_carte, use_container_width=True)
 
 gauche, droite = st.columns(2)
 
-top_coef = df.sort_values("Coefficient (%)", ascending=False).head(15)
+top_coef = df_scope.sort_values("Coefficient (%)", ascending=False).head(15)
 fig_coef = px.bar(
     top_coef,
     x="Coefficient (%)",
@@ -107,7 +128,7 @@ fig_coef.update_layout(
 fig_coef.update_yaxes(categoryorder="total ascending")
 gauche.plotly_chart(fig_coef, use_container_width=True)
 
-top_ratio = df.sort_values("Taux élèves 2024 (%)", ascending=False).head(15)
+top_ratio = df_scope.sort_values("Taux élèves 2024 (%)", ascending=False).head(15)
 fig_ratio = px.bar(
     top_ratio,
     x="Taux élèves 2024 (%)",
@@ -126,7 +147,7 @@ fig_ratio.update_yaxes(categoryorder="total ascending")
 droite.plotly_chart(fig_ratio, use_container_width=True)
 
 fig_scatter = px.scatter(
-    df,
+    df_scope,
     x="POP_2024",
     y="nb_stud_total",
     size="nb_stud_total_2040",
@@ -149,7 +170,7 @@ st.plotly_chart(fig_scatter, use_container_width=True)
 
 with st.expander("Voir les données"):
     st.dataframe(
-        df[
+        df_scope[
             [
                 "num_dep",
                 "Département",

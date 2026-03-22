@@ -5,9 +5,19 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from utils.excel_helpers import charger_csv, charger_geojson
+from utils.excel_helpers import (
+    ajouter_surlignage_departements,
+    charger_csv,
+    charger_geojson,
+    get_global_department_selection,
+    render_global_department_selector,
+    styliser_carte_departements,
+)
 
 st.title("Prix de l'immobilier par département")
+render_global_department_selector(
+    caption="La sélection est partagée entre les pages. Les départements choisis sont surlignés sur la carte et filtrent les graphiques."
+)
 
 geojson_departements = charger_geojson("pages/tables/departements.geojson")
 
@@ -22,6 +32,8 @@ df["Price2025"] = df["Price2025"].round(0)
 df["Price2040"] = df["Price2040"].round(0)
 df["Growth (%)"] = df["Growth"] * 100
 df["Coefficient (%)"] = df["Coefficient"] * 100
+departements_selectionnes = get_global_department_selection(df["dep_name"].dropna().unique())
+df_scope = df[df["dep_name"].isin(departements_selectionnes)].copy() if departements_selectionnes else df.copy()
 
 indicateurs = {
     "Prix 2025": "Price2025",
@@ -31,11 +43,19 @@ indicateurs = {
 }
 indicateur = st.selectbox("Indicateur affiché sur la carte", list(indicateurs.keys()))
 colonne_carte = indicateurs[indicateur]
+leader_immobilier = df_scope.sort_values("Coefficient (%)", ascending=False).iloc[0]
+real_estate_scale = [
+    (0.0, "#fff6d6"),
+    (0.22, "#fee7a6"),
+    (0.48, "#fdba74"),
+    (0.72, "#fb923c"),
+    (1.0, "#b91c1c"),
+]
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Départements couverts", f"{df['dep_name'].nunique()}")
-col2.metric("Prix moyen 2025", f"{df['Price2025'].mean():,.0f} €/m²".replace(",", " "))
-col3.metric("Prix moyen 2040", f"{df['Price2040'].mean():,.0f} €/m²".replace(",", " "))
+col1.metric("Prix moyen 2040", f"{df_scope['Price2040'].mean():,.0f} €/m²".replace(",", " "))
+col2.metric("Meilleur département", leader_immobilier["dep_name"])
+col3.metric("Score du leader", f"{leader_immobilier['Coefficient (%)']:.1f}%")
 
 fig_carte = px.choropleth(
     df,
@@ -51,21 +71,25 @@ fig_carte = px.choropleth(
         "Growth (%)": ":.1f",
         "Coefficient (%)": ":.1f",
     },
-    color_continuous_scale="YlOrRd",
     labels={
         "Price2025": "Prix 2025 (€/m²)",
         "Price2040": "Prix 2040 (€/m²)",
         "Growth (%)": "Croissance (%)",
         "Coefficient (%)": "Coefficient (%)",
     },
+    color_continuous_scale=real_estate_scale,
 )
-fig_carte.update_geos(fitbounds="locations", visible=False, projection={"type": "mercator"})
-fig_carte.update_layout(
-    template="plotly_dark",
+fig_carte = styliser_carte_departements(
+    fig_carte,
+    indicateur,
     height=700,
-    margin={"l": 0, "r": 0, "t": 10, "b": 0},
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
+    tickformat=",.0f" if colonne_carte in {"Price2025", "Price2040"} else ".1f",
+)
+fig_carte = ajouter_surlignage_departements(
+    fig_carte,
+    geojson_departements,
+    departements_selectionnes,
+    "properties.nom",
 )
 st.plotly_chart(fig_carte, use_container_width=True)
 
@@ -75,7 +99,7 @@ st.caption("Vue directe sur les départements les plus chers et les mieux notés
 gauche, droite = st.columns(2, gap="large")
 
 top_prix = (
-    df.dropna(subset=["dep_name", "Price2025"])
+    df_scope.dropna(subset=["dep_name", "Price2025"])
     .sort_values("Price2025", ascending=False)
     .head(12)
 )
@@ -106,7 +130,7 @@ fig_prix.update_yaxes(categoryorder="total ascending", automargin=True)
 fig_prix.update_xaxes(automargin=True)
 gauche.plotly_chart(fig_prix, use_container_width=True)
 
-top_coef = df.sort_values("Coefficient (%)", ascending=False).head(15)
+top_coef = df_scope.sort_values("Coefficient (%)", ascending=False).head(15)
 fig_coef = px.bar(
     top_coef.head(12),
     x="Coefficient (%)",
@@ -138,7 +162,7 @@ fig_coef.update_xaxes(automargin=True)
 droite.plotly_chart(fig_coef, use_container_width=True)
 
 fig_scatter = px.scatter(
-    df,
+    df_scope,
     x="Price2025",
     y="Price2040",
     size="Coefficient (%)",
@@ -161,7 +185,7 @@ st.plotly_chart(fig_scatter, use_container_width=True)
 
 with st.expander("Voir les données"):
     st.dataframe(
-        df[
+        df_scope[
             [
                 "num_dep",
                 "dep_name",

@@ -9,6 +9,7 @@ from utils.excel_helpers import (
     charger_excel,
     charger_geojson,
     colonnes_sans_unnamed,
+    filtrer_territoires_exclus_df,
     nettoyer_colonnes,
 )
 
@@ -276,6 +277,7 @@ def _score_climat():
         lambda code: code.zfill(2) if code.isdigit() else code
     )
     climate_df["Département"] = climate_df["code"].map(code_to_name)
+    climate_df = climate_df.dropna(subset=["Département"]).copy()
     climate_df["Score climat"] = (
         0.6 * climate_df["score_temperature"]
         + 0.1 * climate_df["score_flood"]
@@ -312,7 +314,8 @@ def _score_criminalite():
     df["coefficient"] = pd.to_numeric(df["coefficient"], errors="coerce")
     df["nombre"] = pd.to_numeric(df["nombre"], errors="coerce")
     df["taux_pour_mille_2040"] = pd.to_numeric(df["taux_pour_mille_2040"], errors="coerce")
-    df["Score criminalité"] = (1 - _normaliser_serie(df["coefficient"])).round(4)
+    # Un coefficient élevé correspond ici à un territoire plus sûr.
+    df["Score criminalité"] = _normaliser_serie(df["coefficient"]).round(4)
     return df.rename(columns={"dep_name": "Département"})[
         ["Département", "Score criminalité", "coefficient", "nombre", "taux_pour_mille_2040"]
     ]
@@ -328,6 +331,7 @@ def _score_education():
     df = charger_csv("pages/tables/Education.csv")
     df["num_dep"] = df["num_dep"].astype(str).str.zfill(2)
     df["Département"] = df["num_dep"].map(code_to_name)
+    df = df.dropna(subset=["Département"]).copy()
     df["coefficient"] = pd.to_numeric(df["coefficient"], errors="coerce")
     df["nb_stud_total"] = pd.to_numeric(df["nb_stud_total"], errors="coerce")
     df["POP_2024"] = pd.to_numeric(df["POP_2024"], errors="coerce")
@@ -360,7 +364,7 @@ def _score_immobilier():
     ]
 
 @st.cache_data
-def calculer_scores_departements():
+def calculer_scores_departements(cache_version: str = "exclude-outremer-v1"):
     score_emploi = _score_emploi()
     score_etudiants = _score_etudiants()
     score_revenu = _score_revenu()
@@ -398,4 +402,5 @@ def calculer_scores_departements():
         },
     )
 
+    scores = filtrer_territoires_exclus_df(scores)
     return scores.sort_values("Score global", ascending=False).reset_index(drop=True)

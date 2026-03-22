@@ -4,7 +4,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils.excel_helpers import charger_csv, charger_geojson
+from utils.excel_helpers import (
+    charger_csv,
+    charger_geojson,
+    get_global_department_selection,
+    render_global_department_selector,
+)
 
 st.set_page_config(page_title="Laboratoire climat 2040", layout="wide")
 
@@ -340,19 +345,18 @@ dept_options = (
 )
 dept_codes = dept_options["code"].tolist()
 dept_label_map = dict(zip(dept_options["code"], dept_options["departement"]))
-
-selected_dept_codes = st.multiselect(
-    "Choisir un ou plusieurs départements (pour l'analyse)",
-    options=dept_codes,
-    format_func=lambda code: f"{dept_label_map.get(code, code)} ({code})",
-    key="analysis_dept_codes",
-    placeholder="Sélectionner un ou plusieurs départements...",
+render_global_department_selector(
+    caption=(
+        "La sélection est partagée entre les pages. Le premier département sélectionné pilote les détails "
+        "contextuels, les autres sont repris dans le radar et sur la carte."
+    )
 )
-st.caption(
-    "Le premier département sélectionné pilote les détails contextuels. "
-    "Tous les départements sélectionnés sont comparés sur le radar, surlignés sur la carte "
-    "et repris dans les analyses ci-dessous."
-)
+label_to_code = {label: code for code, label in dept_label_map.items()}
+selected_dept_codes = [
+    label_to_code[departement]
+    for departement in get_global_department_selection(dept_label_map.values())
+    if departement in label_to_code
+]
 
 selected_dept_code = selected_dept_codes[0] if selected_dept_codes else ""
 comparison_dept_codes = selected_dept_codes[1:] if len(selected_dept_codes) > 1 else []

@@ -5,7 +5,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 
-from utils.excel_helpers import charger_csv, charger_geojson
+from utils.excel_helpers import (
+    charger_csv,
+    charger_geojson,
+    get_global_department_selection,
+    render_global_department_selector,
+)
 
 # -----------------------------
 # Configuration page
@@ -502,12 +507,15 @@ fig.update_layout(
     },
 )
 
-selected_codes_map = st.session_state.get("selected_codes", [])
+label_to_code_map = (
+    climate_df[["departement", "code"]].drop_duplicates().set_index("departement")["code"].to_dict()
+)
+selected_codes_map = [
+    label_to_code_map[departement]
+    for departement in get_global_department_selection(label_to_code_map.keys())
+    if departement in label_to_code_map
+]
 if selected_codes_map:
-    selected_codes_map = [
-        code.zfill(2) if str(code).isdigit() else str(code)
-        for code in selected_codes_map
-    ]
     fig.add_trace(
         go.Choropleth(
             geojson=departements,
@@ -565,26 +573,24 @@ st.markdown('<div class="section-spacer"></div>', unsafe_allow_html=True)
 # -----------------------------
 # Recherche globale (radar + classement)
 # -----------------------------
-st.subheader("🔎 Sélection des départements")
+render_global_department_selector(
+    title="🔎 Sélection des départements",
+    caption="La sélection est partagée entre les pages et pilote ici le radar et le classement."
+)
 options_df = (
     climate_df[["code", "departement_label"]]
     .drop_duplicates()
     .sort_values("departement_label")
 )
 code_to_label = dict(zip(options_df["code"], options_df["departement_label"]))
-selected_codes = st.multiselect(
-    "Sélectionne jusqu'à 4 départements",
-    options=options_df["code"].tolist(),
-    format_func=lambda code: code_to_label.get(code, code),
-    placeholder="Tape pour rechercher un département...",
-    key="selected_codes",
-)
-st.caption("Cette sélection filtre le radar et le classement.")
-
-if len(selected_codes) > 4:
-    selected_codes = selected_codes[:4]
-    st.session_state["selected_codes"] = selected_codes
-    st.info("Comparaison limitée à 4 départements pour garder le radar lisible.")
+label_to_code = {}
+for code, label in code_to_label.items():
+    label_to_code[label.split(" (")[0]] = code
+selected_codes = [
+    label_to_code[departement]
+    for departement in get_global_department_selection(label_to_code.keys())
+    if departement in label_to_code
+]
 
 filtered_df = climate_df
 if selected_codes:
