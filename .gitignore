@@ -1,4 +1,9 @@
 .venv/
 __pycache__/
 *.pyc
-tables/
+.DS_Store
+*.Zone.Identifier
+*Zone.Identifier*
+/tables/
+/pages/tables/revenu/FILO2021_DEC_COM.xlsx
+/pages/tables/revenu/FILO2021_DISP_COM.xlsx

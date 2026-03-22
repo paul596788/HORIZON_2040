@@ -1,0 +1,94 @@
+﻿num_dep;Price2025;Price2040;Growth;Coefficient;dep_name;region_name
+92;6600.0;7505.49;0.14;0.0;Hauts-de-Seine;Île-de-France
+75;10000.0;11331.82;0.13;0.030000000000000027;Paris;Île-de-France
+94;4889.7;5284.49;0.08;0.18000000000000005;Val-de-Marne;Île-de-France
+69;3724.5;3983.47;0.07;0.20999999999999996;Rhône;Auvergne-Rhône-Alpes
+93;4023.3;4260.18;0.06;0.24;Seine-Saint-Denis;Île-de-France
+91;3181.8;3345.54;0.05;0.27;Essonne;Île-de-France
+33;3443.8;3568.51;0.04;0.30000000000000004;Gironde;Nouvelle-Aquitaine
+95;3414.05;3563.86;0.04;0.30000000000000004;Val-d'Oise;Île-de-France
+78;3915.4;4044.05;0.03;0.32999999999999996;Yvelines;Île-de-France
+60;2235.3;2309.37;0.03;0.32999999999999996;Oise;Hauts-de-France
+44;3139.2;3164.95;0.01;0.39;Loire-Atlantique;Pays de la Loire
+77;3088.2;3117.56;0.01;0.39;Seine-et-Marne;Île-de-France
+02;1386.4;1374.39;-0.01;0.44999999999999996;Aisne;Hauts-de-France
+31;2866.7;2806.44;-0.02;0.48;Haute-Garonne;Occitanie
+87;1603.6;1579.25;-0.02;0.48;Haute-Vienne;Nouvelle-Aquitaine
+90;1612.1;1583.23;-0.02;0.48;Territoire de Belfort;Bourgogne-Franche-Comté
+55;1248.0;1227.27;-0.02;0.48;Meuse;Grand Est
+10;1612.9;1568.31;-0.03;0.52;Aube;Grand Est
+28;1964.5;1915.02;-0.03;0.52;Eure-et-Loir;Centre-Val de Loire
+59;2211.6;2154.62;-0.03;0.52;Nord;Hauts-de-France
+42;1747.2;1694.61;-0.03;0.52;Loire;Auvergne-Rhône-Alpes
+45;2000.0;1915.28;-0.04;0.55;Loiret;Centre-Val de Loire
+58;1194.2;1152.08;-0.04;0.55;Nièvre;Bourgogne-Franche-Comté
+51;2157.9;2063.3;-0.04;0.55;Marne;Grand Est
+80;1900.0;1815.23;-0.04;0.55;Somme;Hauts-de-France
+27;1984.2;1913.4;-0.04;0.55;Eure;Normandie
+48;1600.0;1535.79;-0.04;0.55;Lozère;Occitanie
+76;2225.0;2116.17;-0.05;0.5800000000000001;Seine-Maritime;Normandie
+18;1370.0;1306.59;-0.05;0.5800000000000001;Cher;Centre-Val de Loire
+84;2787.25;2645.02;-0.05;0.5800000000000001;Vaucluse;Provence-Alpes-Côte d'Azur
+70;1361.1;1287.55;-0.05;0.5800000000000001;Haute-Saône;Bourgogne-Franche-Comté
+62;1827.45;1735.26;-0.05;0.5800000000000001;Pas-de-Calais;Hauts-de-France
+38;2666.7;2541.99;-0.05;0.5800000000000001;Isère;Auvergne-Rhône-Alpes
+52;1250.0;1172.86;-0.06;0.61;Haute-Marne;Grand Est
+54;2030.5;1908.26;-0.06;0.61;Meurthe-et-Moselle;Grand Est
+26;2331.05;2185.57;-0.06;0.61;Drôme;Auvergne-Rhône-Alpes
+16;1544.1;1444.69;-0.06;0.61;Charente;Nouvelle-Aquitaine
+86;1704.5;1597.84;-0.06;0.61;Vienne;Nouvelle-Aquitaine
+89;1524.8;1437.53;-0.06;0.61;Yonne;Bourgogne-Franche-Comté
+37;2421.2;2260.31;-0.07;0.64;Indre-et-Loire;Centre-Val de Loire
+36;1222.2;1131.57;-0.07;0.64;Indre;Centre-Val de Loire
+47;1665.2;1552.81;-0.07;0.64;Lot-et-Garonne;Nouvelle-Aquitaine
+25;2174.05;2026.97;-0.07;0.64;Doubs;Bourgogne-Franche-Comté
+30;2618.0;2442.75;-0.07;0.64;Gard;Occitanie
+82;1909.1;1759.48;-0.08;0.6699999999999999;Tarn-et-Garonne;Occitanie
+03;1425.2;1305.52;-0.08;0.6699999999999999;Allier;Auvergne-Rhône-Alpes
+07;2159.1;1983.44;-0.08;0.6699999999999999;Ardèche;Auvergne-Rhône-Alpes
+01;2648.0;2438.63;-0.08;0.6699999999999999;Ain;Auvergne-Rhône-Alpes
+13;3729.6;3448.54;-0.08;0.6699999999999999;Bouches-du-Rhône;Provence-Alpes-Côte d'Azur
+15;1467.8000000000002;1354.23;-0.08;0.6699999999999999;Cantal;Auvergne-Rhône-Alpes
+39;1750.0;1612.98;-0.08;0.6699999999999999;Jura;Bourgogne-Franche-Comté
+72;1688.85;1554.93;-0.08;0.6699999999999999;Sarthe;Pays de la Loire
+81;1851.9;1708.37;-0.08;0.6699999999999999;Tarn;Occitanie
+41;1657.9;1515.54;-0.09;0.7;Loir-et-Cher;Centre-Val de Loire
+63;2117.75;1928.01;-0.09;0.7;Puy-de-Dôme;Auvergne-Rhône-Alpes
+79;1517.9;1373.82;-0.09;0.7;Deux-Sèvres;Nouvelle-Aquitaine
+08;1411.8;1286.73;-0.09;0.7;Ardennes;Grand Est
+21;2468.1;2216.38;-0.1;0.73;Côte-d'Or;Bourgogne-Franche-Comté
+23;1100.0;985.53;-0.1;0.73;Creuse;Nouvelle-Aquitaine
+24;1768.9;1592.68;-0.1;0.73;Dordogne;Nouvelle-Aquitaine
+11;2061.2;1856.67;-0.1;0.73;Aude;Occitanie
+43;1617.5;1454.64;-0.1;0.73;Haute-Loire;Auvergne-Rhône-Alpes
+46;1777.1999999999998;1596.98;-0.1;0.73;Lot;Occitanie
+32;1730.0;1562.58;-0.1;0.73;Gers;Occitanie
+34;3309.15;2972.16;-0.1;0.73;Hérault;Occitanie
+85;2545.5;2272.24;-0.11;0.76;Vendée;Pays de la Loire
+83;4114.7;3653.35;-0.11;0.76;Var;Provence-Alpes-Côte d'Azur
+61;1473.15;1313.12;-0.11;0.76;Orne;Normandie
+2B;3295.3;2940.1;-0.11;0.76;Haute-Corse;Corse
+19;1632.6999999999998;1454.8;-0.11;0.76;Corrèze;Nouvelle-Aquitaine
+14;2768.8;2473.36;-0.11;0.76;Calvados;Normandie
+04;2443.7;2172.1;-0.11;0.76;Alpes-de-Haute-Provence;Provence-Alpes-Côte d'Azur
+71;1631.0;1457.8;-0.11;0.76;Saône-et-Loire;Bourgogne-Franche-Comté
+35;2862.7;2527.3;-0.12;0.79;Ille-et-Vilaine;Bretagne
+49;2319.8;2041.46;-0.12;0.79;Maine-et-Loire;Pays de la Loire
+65;1857.4;1634.31;-0.12;0.79;Hautes-Pyrénées;Occitanie
+2A;4305.700000000001;3767.19;-0.13;0.8200000000000001;Corse-du-Sud;Corse
+74;4603.35;3991.98;-0.13;0.8200000000000001;Haute-Savoie;Auvergne-Rhône-Alpes
+50;2020.9;1748.24;-0.13;0.8200000000000001;Manche;Normandie
+06;4972.65;4336.52;-0.13;0.8200000000000001;Alpes-Maritimes;Provence-Alpes-Côte d'Azur
+66;2600.0;2231.51;-0.14;0.85;Pyrénées-Orientales;Occitanie
+12;1832.85;1580.85;-0.14;0.85;Aveyron;Occitanie
+09;1696.4;1453.9;-0.14;0.85;Ariège;Occitanie
+17;3014.2;2603.23;-0.14;0.85;Charente-Maritime;Nouvelle-Aquitaine
+29;2193.0;1875.3;-0.14;0.85;Finistère;Bretagne
+40;2840.6;2452.57;-0.14;0.85;Landes;Nouvelle-Aquitaine
+53;1690.6;1454.2;-0.14;0.85;Mayenne;Pays de la Loire
+88;1638.0500000000002;1386.06;-0.15;0.88;Vosges;Grand Est
+73;3721.3;3107.84;-0.16;0.91;Savoie;Auvergne-Rhône-Alpes
+64;3080.15;2589.32;-0.16;0.91;Pyrénées-Atlantiques;Nouvelle-Aquitaine
+56;2839.05;2341.94;-0.18;0.97;Morbihan;Bretagne
+22;2141.8;1728.52;-0.19;1.0;Côtes-d'Armor;Bretagne
+05;2972.2;2397.92;-0.19;1.0;Hautes-Alpes;Provence-Alpes-Côte d'Azur

@@ -75,7 +75,7 @@ a[data-testid="stSidebarNavLink"] span {
 pages = {
     "": [
         st.Page(
-            "accueil.py",
+            "Horizon_2040.py",
             title="🏠 HORIZON 2040",
             default=True,
         ),
