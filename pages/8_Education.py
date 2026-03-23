@@ -13,7 +13,9 @@ from utils.excel_helpers import (
     render_global_department_selector,
     styliser_carte_departements,
 )
+from utils.ui_theme import apply_horizon_theme
 
+apply_horizon_theme()
 st.title("Éducation et dynamique étudiante")
 render_global_department_selector(
     caption="La sélection est partagée entre les pages. Les départements choisis sont surlignés sur la carte et filtrent les graphiques."

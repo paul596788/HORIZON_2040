@@ -4,6 +4,7 @@ import streamlit as st
 
 from utils.department_scores import calculer_scores_departements
 from utils.excel_helpers import charger_geojson, render_global_department_selector
+from utils.ui_theme import apply_horizon_theme
 
 MAJOR_CITIES = [
     {"name": "Paris", "lat": 48.8566, "lon": 2.3522, "textposition": "top center"},
@@ -28,6 +29,7 @@ MAJOR_CITIES = [
 
 
 st.set_page_config(page_title="HORIZON 2040", layout="wide")
+apply_horizon_theme(max_width=1280, top_padding="2.2rem")
 
 st.markdown(
     """
@@ -79,6 +81,23 @@ background: rgba(255,255,255,0.03);
 border: 1px solid rgba(255,255,255,0.08);
 border-radius: 14px;
 padding: 14px 16px;
+}
+div[data-testid="stMetricLabel"],
+div[data-testid="stMetricLabel"] label,
+div[data-testid="stMetricLabel"] p {
+color: #cbd5e1 !important;
+}
+div[data-testid="stMetricValue"],
+div[data-testid="stMetricValue"] > div,
+div[data-testid="stMetricValue"] p {
+color: #f8fafc !important;
+}
+div[data-testid="stMetricDelta"],
+div[data-testid="stMetricDelta"] > div,
+div[data-testid="stMetricDelta"] p,
+div[data-testid="stMetricDelta"] svg {
+color: #86efac !important;
+fill: #86efac !important;
 }
 div[data-testid="stPlotlyChart"] {
 background: rgba(255,255,255,0.01);
@@ -164,7 +183,9 @@ with st.expander("🌐 Le concept", expanded=False):
     HORIZON 2040 croise des projections climatiques, des données démographiques, économiques,
     sanitaires, immobilières et territoriales pour comparer les départements français. L’utilisateur
     ajuste les pondérations selon son scénario d’usage : implantation, investissement, attractivité
-    ou qualité de vie.
+    ou qualité de vie. Les résultats sont ensuite exprimés sur une échelle normalisée de 0 à 1 :
+    plus un score est proche de 1, plus le département est favorable au regard des critères
+    sélectionnés et des pondérations choisies.
   </div>
   <div class="trust-grid">
     <div class="trust-card">
@@ -173,7 +194,7 @@ with st.expander("🌐 Le concept", expanded=False):
     </div>
     <div class="trust-card">
       <div class="trust-title">Méthode multicritère</div>
-      <div class="trust-body">Chaque score est normalisé puis combiné dans un indice composite configurable pour tester différents scénarios.</div>
+      <div class="trust-body">Chaque score est normalisé sur une échelle de 0 à 1, puis combiné dans un indice composite configurable pour tester différents scénarios.</div>
     </div>
     <div class="trust-card">
       <div class="trust-title">Lecture fiable et transparente</div>

@@ -10,9 +10,11 @@ from utils.excel_helpers import (
     render_global_department_selector,
     styliser_carte_departements,
 )
+from utils.ui_theme import apply_horizon_theme
 
 
 st.set_page_config(page_title="Transition démographique 2040", layout="wide")
+apply_horizon_theme(max_width=1280)
 
 st.markdown(
     """

@@ -8,8 +8,10 @@ from utils.excel_helpers import (
     nettoyer_colonnes,
     render_global_department_selector,
 )
+from utils.ui_theme import apply_horizon_theme
 
 
+apply_horizon_theme()
 st.title("Niveaux de vie et pauvreté")
 render_global_department_selector(
     caption="La sélection est partagée entre les pages. Elle s'applique ici lorsque l'analyse est en mode départements."

@@ -11,11 +11,13 @@ from utils.excel_helpers import (
     get_global_department_selection,
     render_global_department_selector,
 )
+from utils.ui_theme import apply_horizon_theme
 
 # -----------------------------
 # Configuration page
 # -----------------------------
 st.set_page_config(page_title="Indice climat 2040", layout="wide")
+apply_horizon_theme(max_width=1200)
 
 st.markdown(
     """

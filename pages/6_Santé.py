@@ -9,8 +9,10 @@ from utils.excel_helpers import (
     nettoyer_colonnes,
     render_global_department_selector,
 )
+from utils.ui_theme import apply_horizon_theme
 
 
+apply_horizon_theme()
 st.title("Accès aux soins et offre de santé")
 render_global_department_selector(
     caption="La sélection est partagée entre les pages. Elle pilote ici les comparaisons départementales."

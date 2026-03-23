@@ -1,135 +1,174 @@
+import json
+from pathlib import Path
+
+import plotly.express as px
 import streamlit as st
 
+from utils.department_scores import calculer_scores_departements
+from utils.ui_theme import apply_horizon_theme
 
-st.set_page_config(
-    page_title="HORIZON 2040",
-    page_icon="🏠",
-    layout="wide",
-    initial_sidebar_state="expanded",
+
+st.set_page_config(page_title="Dashboard socio-economique", layout="wide")
+apply_horizon_theme()
+
+st.title("Dashboard socio-economique")
+st.write("Ajuste les pondérations par thème pour comparer les départements selon tes priorités.")
+
+scores = calculer_scores_departements()
+geojson_departements = json.loads(
+    Path("assets/departements.geojson").read_text(encoding="utf-8")
+)
+themes = {
+    "Emploi": "Score emploi",
+    "Étudiants": "Score étudiants",
+    "Revenu": "Score revenu",
+    "Santé": "Score santé",
+    "Internet": "Score internet",
+    "Criminalité": "Score criminalité",
+    "Éducation": "Score éducation",
+    "Immobilier": "Score immobilier",
+}
+
+selection_themes = st.multiselect(
+    "Thèmes à prendre en compte",
+    list(themes.keys()),
+    default=list(themes.keys()),
 )
 
-st.markdown(
-    """
-<style>
-section[data-testid="stSidebar"] {
-    background:
-        radial-gradient(720px 320px at 0% 0%, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0) 48%),
-        linear-gradient(180deg, #1d1f2a 0%, #141824 100%);
-    border-right: 1px solid rgba(148, 163, 184, 0.12);
-}
+if not selection_themes:
+    st.warning("Sélectionne au moins un thème pour calculer le score global.")
+    st.stop()
 
-section[data-testid="stSidebar"] > div {
-    background: transparent;
-}
+st.subheader("Pondérations")
+colonnes_poids = st.columns(len(selection_themes))
+poids = {}
+for index, theme in enumerate(selection_themes):
+    poids[theme] = colonnes_poids[index].slider(
+        f"Poids {theme}",
+        min_value=0.0,
+        max_value=1.0,
+        value=1.0,
+        step=0.1,
+    )
 
-div[data-testid="stSidebarNav"] {
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(148, 163, 184, 0.12);
-    border-radius: 22px;
-    padding: 0.65rem 0.45rem 0.8rem 0.45rem;
-    margin-top: 0.35rem;
-}
+if sum(poids.values()) == 0:
+    st.warning("La somme des pondérations ne peut pas être nulle.")
+    st.stop()
 
-div[data-testid="stSidebarNav"] header {
-    color: #cbd5e1;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    margin: 0.8rem 0 0.35rem 0;
-}
+poids_normalises = {theme: valeur / sum(poids.values()) for theme, valeur in poids.items()}
+colonnes_selectionnees = [themes[theme] for theme in selection_themes]
 
-div[data-testid="stSidebarNav"] header:first-of-type {
-    margin-top: 0.1rem;
-}
+numerateur = scores[colonnes_selectionnees[0]].where(
+    scores[colonnes_selectionnees[0]].notna(), 0
+) * 0
+denominateur = numerateur.copy()
+for theme in selection_themes:
+    colonne = themes[theme]
+    poids_theme = poids_normalises[theme]
+    present = scores[colonne].notna()
+    numerateur += scores[colonne].where(present, 0) * poids_theme
+    denominateur += present.astype(float) * poids_theme
 
-a[data-testid="stSidebarNavLink"] {
-    min-height: 46px;
-    padding: 0.72rem 0.85rem;
-    border: 1px solid transparent;
-    border-radius: 14px;
-    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
-}
+scores["Score global personnalisé"] = (numerateur / denominateur.where(denominateur > 0)).round(4)
 
-a[data-testid="stSidebarNavLink"]:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(148, 163, 184, 0.14);
-    transform: translateX(2px);
-}
+scores = scores.sort_values("Score global personnalisé", ascending=False).reset_index(drop=True)
 
-a[data-testid="stSidebarNavLink"][aria-current="page"] {
-    background: linear-gradient(180deg, rgba(71, 85, 105, 0.88) 0%, rgba(55, 65, 81, 0.92) 100%);
-    border-color: rgba(148, 163, 184, 0.22);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.05),
-        0 8px 24px rgba(2, 6, 23, 0.18);
-}
+col1, col2, col3 = st.columns(3)
+col1.metric("Départements comparés", f"{scores['Département'].nunique()}")
+col2.metric("Meilleur département", scores.iloc[0]["Département"])
+col3.metric("Score du leader", f"{scores.iloc[0]['Score global personnalisé']:.2f}")
 
-a[data-testid="stSidebarNavLink"] span {
-    font-size: 0.98rem;
-}
-</style>
-""",
-    unsafe_allow_html=True,
+scores_carte = scores[~scores["Département"].isin(["La Réunion", "Martinique"])].copy()
+
+fig = px.choropleth(
+    scores_carte,
+    geojson=geojson_departements,
+    locations="Département",
+    featureidkey="properties.nom",
+    color="Score global personnalisé",
+    hover_name="Département",
+    hover_data={
+        "Région": True,
+        "Score emploi": ":.2f",
+        "Score étudiants": ":.2f",
+        "Score revenu": ":.2f",
+        "Score santé": ":.2f",
+        "Score internet": ":.2f",
+        "Score criminalité": ":.2f",
+        "Score éducation": ":.2f",
+        "Score immobilier": ":.2f",
+        "Score global personnalisé": ":.2f",
+    },
+    color_continuous_scale=[
+        [0.0, "#b2182b"],
+        [0.25, "#ef8a62"],
+        [0.5, "#fddbc7"],
+        [0.75, "#d9f0d3"],
+        [1.0, "#1a9850"],
+    ],
+    range_color=(0, 1),
+    labels={"Score global personnalisé": "Note"},
+)
+fig.update_geos(fitbounds="locations", visible=False, projection={"type": "mercator"})
+fig.update_traces(
+    marker_line_color="rgba(255,255,255,0.18)",
+    marker_line_width=0.6,
+    hoverlabel={"bgcolor": "#161a23", "font_color": "#f5f7fa"},
+)
+fig.update_layout(
+    template="plotly_dark",
+    height=700,
+    margin={"l": 0, "r": 0, "t": 20, "b": 0},
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font={"color": "#e8edf2"},
+    coloraxis_colorbar={
+        "title": {"text": "Note", "font": {"color": "#e8edf2"}},
+        "bgcolor": "rgba(0,0,0,0)",
+        "tickcolor": "#cfd6df",
+        "tickfont": {"color": "#cfd6df"},
+    },
+)
+st.plotly_chart(fig, use_container_width=True)
+
+st.caption(
+    "La carte couvre les départements de métropole et de Corse présents dans le GeoJSON local. "
+    "La Réunion et la Martinique restent dans le tableau ci-dessous."
 )
 
-pages = {
-    "": [
-        st.Page(
-            "Horizon_2040.py",
-            title="🏠 HORIZON 2040",
-            default=True,
-        ),
-    ],
-    "🌍 Contraintes 2040": [
-        st.Page(
-            "pages/1_Climat.py",
-            title="Climat",
-            url_path="climat",
-        ),
-        st.Page(
-            "pages/2_Transition_démographique.py",
-            title="Transition démographique",
-            url_path="transition-demographique",
-        ),
-    ],
-    "🧭 Conditions de vie": [
-        st.Page(
-            "pages/4_Emplois_chomage.py",
-            title="Emploi",
-            url_path="emploi",
-        ),
-        st.Page(
-            "pages/5_Revenu.py",
-            title="Revenu",
-            url_path="revenu",
-        ),
-        st.Page(
-            "pages/6_Santé.py",
-            title="Santé",
-            url_path="sante",
-        ),
-        st.Page(
-            "pages/8_Education.py",
-            title="Éducation",
-            url_path="education",
-        ),
-        st.Page(
-            "pages/10_Internet.py",
-            title="Fibre",
-            url_path="fibre",
-        ),
-        st.Page(
-            "pages/7_Criminalite.py",
-            title="Sécurité",
-            url_path="securite",
-        ),
-        st.Page(
-            "pages/3_Immobilier.py",
-            title="Immobilier",
-            url_path="immobilier",
-        ),
-    ],
-}
+st.subheader("Classement personnalisé")
+st.dataframe(
+    scores[
+        [
+            "Département",
+            "Région",
+            "Score emploi",
+            "Score étudiants",
+            "Score revenu",
+            "Score santé",
+            "Score internet",
+            "Score criminalité",
+            "Score éducation",
+            "Score immobilier",
+            "Score global personnalisé",
+        ]
+    ].style.format(
+        {
+            "Score emploi": "{:.2f}",
+            "Score étudiants": "{:.2f}",
+            "Score revenu": "{:.2f}",
+            "Score santé": "{:.2f}",
+            "Score internet": "{:.2f}",
+            "Score criminalité": "{:.2f}",
+            "Score éducation": "{:.2f}",
+            "Score immobilier": "{:.2f}",
+            "Score global personnalisé": "{:.2f}",
+        }
+    ),
+    use_container_width=True,
+)
 
-current_page = st.navigation(pages, position="sidebar", expanded=True)
-current_page.run()
+st.caption(
+    "Lecture des notes: 0 = moins favorable dans l'échantillon, 1 = plus favorable. "
+    "Le score global personnalisé est une moyenne pondérée des thèmes sélectionnés."
+)

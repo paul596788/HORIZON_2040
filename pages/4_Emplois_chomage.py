@@ -7,7 +7,9 @@ from utils.excel_helpers import (
     nettoyer_colonnes,
     render_global_department_selector,
 )
+from utils.ui_theme import apply_horizon_theme
 
+apply_horizon_theme()
 st.title("Évolution du chômage par département")
 
 df = charger_excel("pages/tables/emplois_et_chomage/Demandeurs_emploi_taux_chomage_2000_2025.xlsx")
